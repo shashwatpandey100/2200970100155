@@ -3,24 +3,25 @@ import { generateShortCode } from "../utils/shortCode.js";
 
 // POST /shorturls
 export const generateShortUrl = (req, res) => {
-  const { url, shortcode, validityDays } = req.body;
+  const { url, shortcode, validity } = req.body;
 
   if (!url) {
     return res.status(400).json({ error: "URL is required." });
   }
 
-  let code = shortcode || generateShortCode();
+  const code = shortcode || generateShortCode();
+  const validityMinutes = typeof validity === "number" ? validity : 30;
 
   try {
-    const result = saveUrl(url, code, validityDays);
-    res.status(201).json(result);
+    const { shortLink, expiry } = saveUrl(url, code, validityMinutes);
+    res.status(201).json({ shortLink, expiry });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
 // GET /shorturls/:shortcode
-export const redirectToOriginalUrl = (req, res) => {
+export const getShortUrlDetails = (req, res) => {
   const { shortcode } = req.params;
   const data = findUrlByShortcode(shortcode);
 
@@ -29,14 +30,14 @@ export const redirectToOriginalUrl = (req, res) => {
   }
 
   const now = new Date();
-  if (now > data.expiry) {
+  if (now > new Date(data.expiry)) {
     return res.status(410).json({ error: "Short URL has expired." });
   }
 
-  // sending redirection data, so that frontend can use it to redirect.
-  res.status(302).json({
+  res.json({
     url: data.url,
-    expiresAt: data.expiry,
-    message: "Redirect to this URL.",
+    createdAt: data.created,
+    expiry: data.expiry,
+    shortcode: data.shortcode,
   });
 };

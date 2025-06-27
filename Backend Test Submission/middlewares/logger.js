@@ -1,6 +1,6 @@
-const axios = require("axios");
+import axios from "axios";
 
-async function logToTestServer(stack, level, pkg, message) {
+export async function logToTestServer(stack, level, pkg, message) {
   try {
     await axios.post("http://20.244.56.144/evaluation-service/logs", {
       stack,
@@ -11,7 +11,7 @@ async function logToTestServer(stack, level, pkg, message) {
   } catch (err) {}
 }
 
-function logger(req, res, next) {
+export function logger(req, res, next) {
   const start = Date.now();
   res.on("finish", () => {
     const elapsed = Date.now() - start;
@@ -24,5 +24,3 @@ function logger(req, res, next) {
   });
   next();
 }
-
-module.exports = { logger, logToTestServer };

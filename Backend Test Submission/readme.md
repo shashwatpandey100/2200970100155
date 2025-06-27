@@ -28,3 +28,6 @@ Folders:
 
 -(Shortcodes are randomly generated if not provided)
 -(Logging is done for every request)
+
+Note:
+I chose to implement only the core shortener functionality per time constraints.
